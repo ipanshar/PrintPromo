@@ -123,5 +123,10 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\minussquare_120267.png" />
+    <None Include="Resources\checkmarksquare_120277.png" />
+    <Content Include="Resources\square-minus_icon-icons.com_72274.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

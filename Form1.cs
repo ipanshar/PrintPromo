@@ -24,6 +24,28 @@ namespace PrintPromo
             InitializeComponent();
         }
 
+        private void selectedButon()
+        {
+            var selectedRows = dataGridView1.Rows
+                .Cast<DataGridViewRow>()
+                .Where(r => r.Cells["Selected"].Value != null && Convert.ToBoolean(r.Cells["Selected"].Value))
+                .ToList();
+
+            if (selectedRows.Count == 0)
+            {
+                toolStripButton3.Image = global::PrintPromo.Properties.Resources.checkmarksquare_120277;
+                toolStripButton3.Text = "Выделить все";
+                toolStripLabel1.Text = "0 записей выбрано";
+            }
+            else
+            {
+                toolStripButton3.Image = global::PrintPromo.Properties.Resources.minussquare_120267;
+                toolStripButton3.Text = "Снять все выделеные";
+                toolStripLabel1.Text = $"{selectedRows.Count} записей выбрано";
+            }
+
+        }
+
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Tool strip button clicked!");
@@ -73,8 +95,7 @@ namespace PrintPromo
             }
         }
 
-        // To resolve the ambiguity between "System.Data.DataTable" and "Microsoft.Office.Interop.Word.DataTable",
-        // explicitly qualify the usage of "DataTable" with the appropriate namespace.
+
 
         public static System.Data.DataTable ToDataTable<T>(IList<T> data)
         {
@@ -94,78 +115,91 @@ namespace PrintPromo
 
        
 
-        private void ExportSelectedToWord()
+private void ExportSelectedToWord()
         {
-            var selectedRows = dataGridView1.Rows
-                .Cast<DataGridViewRow>()
-                .Where(r => r.Cells["Selected"].Value != null && Convert.ToBoolean(r.Cells["Selected"].Value))
-                .ToList();
+            // Блокируем форму и показываем курсор выполнения  
+            this.Enabled = false;
+            Cursor.Current = Cursors.WaitCursor;
 
-            if (selectedRows.Count == 0)
+            try
             {
-                MessageBox.Show("Не выбрано ни одной записи.");
-                return;
-            }
+                var selectedRows = dataGridView1.Rows
+                    .Cast<DataGridViewRow>()
+                    .Where(r => r.Cells["Selected"].Value != null && Convert.ToBoolean(r.Cells["Selected"].Value))
+                    .ToList();
 
-            var wordApp = new Word.Application();
-            wordApp.Visible = false;
-            var doc = wordApp.Documents.Add();
-
-            doc.PageSetup.Orientation = Word.WdOrientation.wdOrientLandscape;
-            doc.PageSetup.LeftMargin = wordApp.CentimetersToPoints(2.7f);
-            doc.PageSetup.RightMargin = wordApp.CentimetersToPoints(1.0f);
-            doc.PageSetup.TopMargin = wordApp.CentimetersToPoints(1.0f);
-            doc.PageSetup.BottomMargin = wordApp.CentimetersToPoints(1.5f);
-
-            int labelsPerPage = 16;
-            float labelWidth = wordApp.CentimetersToPoints(6.5f);
-            float labelHeight = wordApp.CentimetersToPoints(3.7f);
-
-            int tableRows = 4, tableCols = 4;
-            int count = 0;
-            Word.Table table = null;
-
-            for (int i = 0; i < selectedRows.Count; i++)
-            {
-                if (count % labelsPerPage == 0)
+                if (selectedRows.Count == 0)
                 {
-                    if (table != null)
-                    {
-                        doc.Paragraphs.Add();
-                    }
-
-                    table = doc.Tables.Add(doc.Paragraphs.Last.Range, tableRows, tableCols);
-                    table.Borders.Enable = 0;
-
-                    for (int r = 1; r <= tableRows; r++)
-                    {
-                        for (int c = 1; c <= tableCols; c++)
-                        {
-                            table.Cell(r, c).Width = labelWidth;
-                            table.Cell(r, c).Height = labelHeight;
-                            table.Cell(r, c).HeightRule = Word.WdRowHeightRule.wdRowHeightExactly;
-                            table.Cell(r, c).VerticalAlignment = Word.WdCellVerticalAlignment.wdCellAlignVerticalTop;
-                        }
-                    }
-
-                    table.Spacing = 0;
-                    table.AllowAutoFit = false;
+                    MessageBox.Show("Не выбрано ни одной записи.");
+                    return;
                 }
 
-                int row = (count % labelsPerPage) / tableCols + 1;
-                int col = (count % labelsPerPage) % tableCols + 1;
+                var wordApp = new Word.Application();
+                wordApp.Visible = false;
+                var doc = wordApp.Documents.Add();
 
-                var cell = table.Cell(row, col);
-                var data = selectedRows[i].Cells;
+                doc.PageSetup.Orientation = Word.WdOrientation.wdOrientLandscape;
+                doc.PageSetup.LeftMargin = wordApp.CentimetersToPoints(2.7f);
+                doc.PageSetup.RightMargin = wordApp.CentimetersToPoints(1.0f);
+                doc.PageSetup.TopMargin = wordApp.CentimetersToPoints(1.0f);
+                doc.PageSetup.BottomMargin = wordApp.CentimetersToPoints(1.5f);
 
-                // Заполняем ячейку с форматированием
-                FillLabelCell(cell, data);
+                int labelsPerPage = 16;
+                float labelWidth = wordApp.CentimetersToPoints(6.5f);
+                float labelHeight = wordApp.CentimetersToPoints(3.7f);
 
-                count++;
+                int tableRows = 4, tableCols = 4;
+                int count = 0;
+                Word.Table table = null;
+
+                for (int i = 0; i < selectedRows.Count; i++)
+                {
+                    if (count % labelsPerPage == 0)
+                    {
+                        if (table != null)
+                        {
+                            doc.Paragraphs.Add();
+                        }
+
+                        table = doc.Tables.Add(doc.Paragraphs.Last.Range, tableRows, tableCols);
+                        table.Borders.Enable = 0;
+
+                        for (int r = 1; r <= tableRows; r++)
+                        {
+                            for (int c = 1; c <= tableCols; c++)
+                            {
+                                table.Cell(r, c).Width = labelWidth;
+                                table.Cell(r, c).Height = labelHeight;
+                                table.Cell(r, c).HeightRule = Word.WdRowHeightRule.wdRowHeightExactly;
+                                table.Cell(r, c).VerticalAlignment = Word.WdCellVerticalAlignment.wdCellAlignVerticalTop;
+                            }
+                        }
+
+                        table.Spacing = 0;
+                        table.AllowAutoFit = false;
+                    }
+
+                    int row = (count % labelsPerPage) / tableCols + 1;
+                    int col = (count % labelsPerPage) % tableCols + 1;
+
+                    var cell = table.Cell(row, col);
+                    var data = selectedRows[i].Cells;
+
+                    // Заполняем ячейку с форматированием  
+                    FillLabelCell(cell, data);
+
+                    count++;
+                }
+
+                wordApp.Visible = true;
+                doc.Activate();
             }
-
-            wordApp.Visible = true;
-            doc.Activate();
+            finally
+            {
+                // Разблокируем форму и возвращаем стандартный курсор  
+                this.Enabled = true;
+                Cursor.Current = Cursors.Default;
+            }
         }
 
         private void FillLabelCell(Word.Cell cell, DataGridViewCellCollection data)
@@ -299,13 +333,43 @@ namespace PrintPromo
         }
 
 
-
-
-
-
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             ExportSelectedToWord();
+            selectedButon();
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            selectedButon();
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            var selectedRows = dataGridView1.Rows
+                .Cast<DataGridViewRow>()
+                .Where(r => r.Cells["Selected"].Value != null && Convert.ToBoolean(r.Cells["Selected"].Value))
+                .ToList();
+
+           
+
+                if (selectedRows.Count == 0)
+                {
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    {
+                        row.Cells["Selected"].Value = true;
+                    }
+                }
+                else
+                {
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    {
+                        row.Cells["Selected"].Value = false;
+                    }
+                }
+            selectedButon();
+
+
         }
     }
 

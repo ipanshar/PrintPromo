@@ -63,6 +63,26 @@ namespace PrintPromo.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap checkmarksquare_120277 {
+            get {
+                object obj = ResourceManager.GetObject("checkmarksquare_120277", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap minussquare_120267 {
+            get {
+                object obj = ResourceManager.GetObject("minussquare_120267", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap search_icon_icons_com_52389 {
             get {
                 object obj = ResourceManager.GetObject("search_icon-icons.com_52389", resourceCulture);
